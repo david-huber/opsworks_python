@@ -68,6 +68,7 @@ If your entrypoint is different set:
 If you want supervisor to use a specific command:
 `["opsworks_python"]["supervisor"]["command"] = 'mycommand'` 
 
+Other supervisor options for the service are described [here](https://supermarket.chef.io/cookbooks/supervisor)
 
 #### Disable supervisor
 set `node["opsworks_python"]["supervisor"]["disabled"] = true` and supervisor will be disabled.

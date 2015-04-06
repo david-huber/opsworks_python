@@ -18,11 +18,35 @@ define :supervisor_deploy do
     end
   end
 
-  options[:command] = command
-  options[:env] = env
   Chef::Log.info("supervisor command for application #{application} is #{command}")
   supervisor_service application do
-    options
+    command command
+    environment env
+    process_name application
+    numprocs options[:numprocs]
+    numprocs_start options[:numprocs_start]
+    priority options[:priority]
+    autostart options[:autostart]
+    autorestart options[:autorestart]
+    startsecs options[:startsecs]
+    startretries options[:startretries]
+    exitcodes options[:exitcodes]
+    stopsignal options[:stopsignal]
+    stopwaitsecs options[:stopwaitsecs]
+    user options[:user]
+    redirect_stderr options[:redirect_stderr]
+    stdout_logfile options[:stdout_logfile]
+    stdout_logfile_maxbytes options[:stdout_logfile_maxbytes]
+    stdout_logfile_backups options[:stdout_logfile_backups]
+    stdout_capture_maxbytes options[:stdout_capture_maxbytes]
+    stdout_events_enabled options[:stdout_events_enabled]
+    stderr_logfile options[:stderr_logfile]
+    stderr_logfile_maxbytes options[:stderr_logfile_maxbytes]
+    stderr_logfile_backups options[:stderr_logfile_backups]
+    stderr_capture_maxbytes options[:stderr_capture_maxbytes]
+    stderr_events_enabled options[:stderr_events_enabled]
+    umask options[:umask]
+    serverurl options[:serverurl]
   end
 
 end

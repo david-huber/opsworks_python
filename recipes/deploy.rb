@@ -37,6 +37,12 @@ node[:deploy].each do |application, deploy|
     only_if "test -e #{::File.join(deploy[:deploy_to], 'current')}"
   end
 
+  if deploy[:opsworks_python][:supervisor][:disabled]
+    Chef::Log.info("Skipping supervisor for application #{application} as marked disabled")
+    next
+  end
+
+  Chef::Log.info("Running deploy_python::supervisor_deploy for application #{application}")
   supervisor_deploy do
     deploy_data deploy
     app_name application
