@@ -1,7 +1,20 @@
-define :python_base_setup do
-  deploy = params[:deploy_data]
-  application = params[:app_name]
+action :setup do
+	setup(new_resource.name, new_resource.deploy)
+  new_resource.updated_by_last_action(false)
+end
 
+action :install do 
+	install(new_resource.name, new_resource.deploy)
+  new_resource.updated_by_last_action(false)
+end
+
+action :supervise do
+  supervise(new_resource.name, new_resource.deploy)
+  new_resource.updated_by_last_action(false)
+end
+
+
+def setup(application, deploy)
   Chef::Log.debug("*****************************************")
   Chef::Log.debug("Running #{recipe_name} for #{application}")
   Chef::Log.debug("*****************************************")
@@ -23,7 +36,6 @@ define :python_base_setup do
   # We also need to override the prior override
   node.override['python']['pip_location'] = "/usr/local/bin/pip"
   node.override['python']['virtualenv_location'] = "/usr/local/bin/virtualenv"
-  include_recipe "python::default"
 
   py_version = deploy["python_major_version"]
   use_custom_py = py_version && py_version != "2.7"
@@ -100,5 +112,90 @@ define :python_base_setup do
     deploy_data deploy
     app_name application
   end
-
 end
+
+def install(application, deploy)
+  
+  venv_path = ::File.join(deploy[:deploy_to], 'shared', 'env')
+  node.normal["deploy"][application]["venv"] = venv_path
+  python_virtualenv application + '-venv' do
+    path venv_path
+    owner deploy[:user]
+    group deploy[:group]
+    action :create
+  end
+
+  packages = deploy["packages"] ? deploy["packages"] : node["opsworks_python"]["packages"]
+  
+  # Install pip dependencies
+  packages.each do |name, ver|
+    python_pip name do
+      version ver if ver && ver.length > 0
+      virtualenv venv_path
+      user deploy[:user]
+      group deploy[:group]
+      action :install
+    end
+  end
+
+  # Create environment file
+  template ::File.join(deploy[:deploy_to], "shared","app.env") do
+    source "app.env.erb"
+    mode 0770
+    owner deploy[:user]
+    group deploy[:group]
+    variables(
+      :environment => OpsWorks::Escape.escape_double_quotes(deploy[:environment_variables])
+    )
+    only_if {::File.exists?("#{deploy[:deploy_to]}/shared")}
+  end
+end
+
+def supervise(application, deploy)
+  options = deploy["opsworks_python"]["supervisor"]
+  venv_path = ::File.join(deploy[:deploy_to], 'shared', 'env')
+  env = OpsWorks::Escape.escape_double_quotes(deploy[:environment_variables])
+  env["PATH"] = venv_path
+  script_path = ::File.join(deploy[:deploy_to], 'current', options["script"])
+  python_path = ::File.join(venv_path, "bin", "python")
+
+  command = "#{python_path} #{script_path}"
+  if options[:command]
+    command = options[:command]
+    if options.has_key?("command_in_env")
+      command = ::File.join(venv_path, command)
+    end
+  end
+
+  Chef::Log.info("supervisor command for application #{application} is #{command}")
+  supervisor_service application do
+    command command
+    environment env
+    process_name application
+    numprocs options[:numprocs]
+    numprocs_start options[:numprocs_start]
+    priority options[:priority]
+    autostart options[:autostart]
+    autorestart options[:autorestart]
+    startsecs options[:startsecs]
+    startretries options[:startretries]
+    exitcodes options[:exitcodes]
+    stopsignal options[:stopsignal]
+    stopwaitsecs options[:stopwaitsecs]
+    user options[:user]
+    redirect_stderr options[:redirect_stderr]
+    stdout_logfile options[:stdout_logfile]
+    stdout_logfile_maxbytes options[:stdout_logfile_maxbytes]
+    stdout_logfile_backups options[:stdout_logfile_backups]
+    stdout_capture_maxbytes options[:stdout_capture_maxbytes]
+    stdout_events_enabled options[:stdout_events_enabled]
+    stderr_logfile options[:stderr_logfile]
+    stderr_logfile_maxbytes options[:stderr_logfile_maxbytes]
+    stderr_logfile_backups options[:stderr_logfile_backups]
+    stderr_capture_maxbytes options[:stderr_capture_maxbytes]
+    stderr_events_enabled options[:stderr_events_enabled]
+    umask options[:umask]
+    serverurl options[:serverurl]
+  end
+end
+

@@ -4,7 +4,7 @@ define :python_dependencies do
 
   # Setup venv
   venv_path = ::File.join(deploy[:deploy_to], 'shared', 'env')
-  node.normal[:deploy][application]["venv"] = venv_path
+  node.normal["deploy"][application]["venv"] = venv_path
   python_virtualenv application + '-venv' do
     path venv_path
     owner deploy[:user]

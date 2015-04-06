@@ -27,20 +27,21 @@ In your stack, update enable your custom json:
  	 "deploy": {
 		"my_python_app": {
      		"custom_type": "python", // Required otherwise the recipe will skip
-      // List of package to install (optional)
-      "packages": { 
-        "pip_package_name": "latest",
-      },
-      // OS packages  (optional)
-      "os_packages": { 
-      	"package_name": "lasest"
-      },
-      "opsworks_python": {
-      	"supervisor": {
-      		// supervisor options
-      	}
-      }
-    }
+      		// List of package to install (optional)
+      		"packages": { 
+        		"pip_package_name": "latest",
+      		},
+      		// OS packages  (optional)
+      		"os_packages": { 
+      			"package_name": "lasest"
+      		},
+      		"opsworks_python": {
+      			"supervisor": {
+      				// supervisor options
+      			}
+      		}
+    	}
+    }}
 
 
 Recipes

@@ -3,18 +3,30 @@
 # Recipe:: default
 #
 include_recipe 'deploy'
+include_recipe "python::default"
 
-node[:deploy].each do |application, deploy|
+node["deploy"].each do |application, deploy|
   if deploy["application_type"] != "other" || deploy["custom_type"] != 'python'
     Chef::Log.debug("Skipping deploy_python::deploy for application #{application} as it is not a python app")
     next
   end
 
   Chef::Log.info("Running deploy_python::python_base_setup for application #{application}")
-  Chef::Log.info("#{deploy}")
+<<<<<<< HEAD
   python_base_setup do
     deploy_data deploy
     app_name application
+=======
+  # python_base_setup do
+  #   deploy_data deploy
+  #   app_name application
+  # end
+
+  opsworks_python application do
+    action :setup
+    deploy deploy
+    application application
+>>>>>>> 140e86f... Fix
   end
 
   Chef::Log.info("Running opsworks_deploy_dir for application #{application}")
@@ -31,9 +43,8 @@ node[:deploy].each do |application, deploy|
   end
 
   Chef::Log.info("Running deploy_python::python_dependencies for application #{application}")
-  python_dependencies do
+  python_dependencies application do
     deploy_data deploy
-    app_name application
     only_if "test -e #{::File.join(deploy[:deploy_to], 'current')}"
   end
 
@@ -43,10 +54,17 @@ node[:deploy].each do |application, deploy|
   end
 
   Chef::Log.info("Running deploy_python::supervisor_deploy for application #{application}")
+<<<<<<< HEAD
   supervisor_deploy do
     deploy_data deploy
     app_name application
     only_if "test -e #{::File.join(deploy[:deploy_to], 'current')}"
+=======
+  opsworks_python application do
+    action :supervise
+    deploy deploy
+    application application
+>>>>>>> 140e86f... Fix
   end
 
 end

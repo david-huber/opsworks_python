@@ -4,7 +4,7 @@ maintainer_email "florent@flovilmart.com"
 license          "BSD License"
 description      "Deploys and configures python based applications with supervisor"
 long_description  IO.read(File.join(File.dirname(__FILE__), 'README.md'))
-version          "0.0.1"
+version          "0.0.2"
 
 depends "deploy"
 depends "scm_helper"
@@ -16,3 +16,5 @@ depends "supervisor"
 
 recipe "opsworks_python::deploy", "Install and setup a python application in a virtualenv"
 recipe "opsworks_python::r3-mount-patch", "Patch to mount /mnt filesystems for r3 instances"
+
+supports "amazon"

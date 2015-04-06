@@ -2,7 +2,7 @@
 # Cookbook Name:: deploy_python
 # Recipe:: r3-mount-patch
 #
-if node[:opsworks][:instance][:instance_type].start_with?('r3.')
+if node["opsworks"]["instance"]["instance_type"].start_with?('r3.')
     fs_dev = '/dev/xvdb'
     execute "mkfs" do
         command "mkfs.ext4 -E nodiscard #{fs_dev}"
@@ -24,6 +24,7 @@ if node[:opsworks][:instance][:instance_type].start_with?('r3.')
                 mode 0700
                 recursive true
                 action :create
+                only_if do !dir.nil? && !dir.empty? && !::File.exists?(dir) end
             end
         end
     end
