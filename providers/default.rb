@@ -107,11 +107,6 @@ def setup(application, deploy)
     action :create
     recursive true
   end
-
-  python_dependencies do
-    deploy_data deploy
-    app_name application
-  end
 end
 
 def install(application, deploy)

@@ -1,4 +1,4 @@
-application_buildout Cookbok CHANGELOG
-======================================
+opsworks_python Cookbok CHANGELOG
+=================================
 
 

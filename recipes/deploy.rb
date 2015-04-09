@@ -11,7 +11,7 @@ node["deploy"].each do |application, deploy|
     next
   end
 
-  Chef::Log.info("Running deploy_python::python_base_setup for application #{application}")
+  Chef::Log.info("Running opsworks_python:: :setup for application #{application}")
 
   opsworks_python application do
     action :setup
@@ -32,10 +32,11 @@ node["deploy"].each do |application, deploy|
     app application
   end
 
-  Chef::Log.info("Running deploy_python::python_dependencies for application #{application}")
-  python_dependencies application do
-    deploy_data deploy
-    only_if "test -e #{::File.join(deploy[:deploy_to], 'current')}"
+  Chef::Log.info("Running opsworks_python:: :install for application #{application}")
+  opsworks_python application do
+    action :install
+    deploy deploy
+    application application
   end
 
   if deploy[:opsworks_python][:supervisor][:disabled]
@@ -43,7 +44,7 @@ node["deploy"].each do |application, deploy|
     next
   end
 
-  Chef::Log.info("Running deploy_python::supervisor_deploy for application #{application}")
+  Chef::Log.info("Running opsworks_python:: :supervisor for application #{application}")
   opsworks_python application do
     action :supervise
     deploy deploy
