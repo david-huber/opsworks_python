@@ -138,6 +138,16 @@ def install(application, deploy)
     end
   end
 
+  requirements_file = ::File.join(deploy[:deploy_to], "current", "requirements.txt")
+  python_pip requirements_file do
+    action :install
+    options "-r"
+    virtualenv venv_path
+    user deploy[:user]
+    group deploy[:group]
+    only_if {::File.exists?(requirements_file)}
+  end
+
   # Create environment file
   template ::File.join(deploy[:deploy_to], "shared","app.env") do
     source "app.env.erb"
